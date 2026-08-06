@@ -64,6 +64,3 @@ Target Model
   ↓
 Token 3
   ↓
-...
-
----
