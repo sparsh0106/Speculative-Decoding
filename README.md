@@ -1,67 +1,49 @@
-# **Speculative Decoding**
----
+# ⚡ Speculative Decoding — Fast Transformer Inference from Scratch
 
-## `setup.ipynb` - Notebook 01: Setup & Model Inference
+An algorithmic, from-scratch PyTorch implementation of **Speculative Decoding**, based on the ICML 2023 paper:
+> **Fast Inference from Transformers via Speculative Decoding**  
+> *Yaniv Leviathan, Matan Kalman, Yossi Matias (ICML 2023)*
 
-This notebook is the first part of a from-scratch implementation of **Speculative Decoding**, based on:
-> **Fast Inference from Transformers via Speculative Decoding**
-> Yaniv Leviathan, Matan Kalman, Yossi Matias - ICML 2023
-
-The objective of this project is to understand and implement speculative decoding at the algorithmic level rather than relying directly on a pre-built speculative generation API.
-
-
-### Objective of Notebook 01
-
-Before implementing speculative decoding, we first need to understand the basic inference pipeline of an autoregressive Transformer.
-
-This notebook establishes that foundation by:
-
-- Setting up the PyTorch and Hugging Face environment
-- Configuring GPU inference
-- Loading a shared tokenizer
-- Loading the **Draft Model**
-- Loading the **Target Model**
-- Comparing their parameter counts and configurations
-- Tokenizing an input prompt
-- Performing a manual Transformer forward pass
-- Inspecting the output logits
-- Performing greedy next-token prediction
-- Inspecting the model's KV cache (`past_key_values`)
-
-No speculative decoding is performed yet.
-
-#### Models
-
-We use two models from the **SmolLM2** family:
-
-| Role | Model | Parameters |
-|---|---|---:|
-| Draft Model | `HuggingFaceTB/SmolLM2-360M` | ~360M |
-| Target Model | `HuggingFaceTB/SmolLM2-1.7B` | ~1.7B |
-
-The **draft model** will eventually generate inexpensive speculative token proposals.
-
-The **target model** represents the model whose output distribution we want to preserve.
-
-Using models from the same family also allows us to work with a compatible tokenizer and vocabulary.
-
-#### Why Two Models?
-
-Standard autoregressive generation works sequentially:
-
-```text
-Prompt
-  ↓
-Target Model
-  ↓
-Token 1
-  ↓
-Target Model
-  ↓
-Token 2
-  ↓
-Target Model
-  ↓
-Token 3
+The goal of this project is to implement and benchmark autoregressive and speculative decoding at the tensor/logit level rather than relying on high-level generation APIs.
 
 ---
+
+## 📂 Repository Structure
+
+| File | Description |
+| :--- | :--- |
+| `setup.ipynb` | **Notebook 01 — Setup & Model Inference**: Environment configuration, shared tokenizer setup, loading the Target Model (`HuggingFaceTB/SmolLM2-1.7B`) and Draft Model (`HuggingFaceTB/SmolLM2-360M`), parameter comparison, and manual single-step forward passes. |
+| `Vanilla_Autoregressive_Decoding.ipynb` | **Notebook 02 — Vanilla Autoregressive Decoding**: From-scratch greedy autoregressive decoding both **without KV-cache** and **with KV-cache**, verifying output equivalence and benchmarking forward-pass latency as a baseline for speculative decoding. |
+| `README.md` | Project overview and notebook breakdown. |
+
+---
+
+## 🔬 Model Configuration
+
+- **Target Model**: `HuggingFaceTB/SmolLM2-1.7B` (`float16` on CUDA)
+- **Draft Model**: `HuggingFaceTB/SmolLM2-360M` (`float16` on CUDA)
+- **Speculative Lookahead ($k$)**: `4` draft tokens per target verification step
+- **Shared Vocabulary**: Both models share the SmolLM2 tokenizer family, allowing direct token-ID and probability comparison without re-tokenization.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+```bash
+pip install torch transformers numpy tqdm jupyter
+```
+
+### Running the Notebooks
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/sparsh0106/Speculative-Decoding.git
+   cd Speculative-Decoding
+   ```
+2. Run `setup.ipynb` followed by `Vanilla_Autoregressive_Decoding.ipynb` in Jupyter Lab / Notebook with a CUDA-enabled GPU.
+
+---
+
+## 👤 Author
+
+**Sparsh Agarwal** — [GitHub](https://github.com/sparsh0106)
